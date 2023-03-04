@@ -1,0 +1,13 @@
+app_system_user: "tdarr"
+app_system_user_uid: ~
+app_system_user_gid: ~
+app_root_dir: "/srv/tdarr-worker"
+app_skip_start: false
+
+app_compose_project_name: "tdarr-worker"
+app_compose_image: "ghcr.io/haveagitgat/tdarr_node:2.00.19.1"
+
+app_tdarr_server_ip: "{{ undef('You must provide a Tdarr server IP') }}"
+app_tdarr_node_name: "tdarr-worker"
+
+juicefs_redis_url: "{{ undef('You must provide a JuiceFS Redis URL') }}"

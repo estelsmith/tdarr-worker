@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+    juicefs:
+        image: "juicedata/mount:latest"
+        entrypoint: "/app/entrypoint.sh"
+        env_file: "./secrets/juicefs/env"
+        environment:
+            PUID: "{{ app_user.uid }}"
+            PGID: "{{ app_user.group }}"
+        healthcheck:
+            test: ["CMD", "/app/healthcheck.sh"]
+            start_period: "15s"
+            interval: "15s"
+            timeout: "10s"
+            retries: 3
+        restart: "unless-stopped"
+        cap_add:
+            - "SYS_ADMIN"
+        devices:
+            - "/dev/fuse"
+        volumes:
+            - "./juicefs:/app:ro"
+            - "./secrets/juicefs:/run/secrets:ro"
+            - "./data/juicefs-cache:/juicefs-cache"
+            - "./data/juicefs:/mnt:rw,shared"
+
+    worker:
+        image: "{{ app_compose_image }}"
+        depends_on:
+            juicefs:
+                condition: "service_healthy"
+        environment:
+            TZ: "America/Indiana/Indianapolis"
+            PUID: "{{ app_user.uid }}"
+            PGID: "{{ app_user.group }}"
+            nodeName: "{{ app_tdarr_node_name }}"
+            serverIP: "{{ app_tdarr_server_ip }}"
+            serverPort: "8266"
+        restart: "unless-stopped"
+        volumes:
+            - "./data/configs:/app/configs"
+            - "./data/logs:/app/logs"
+            - "./data/juicefs:/app/juicefs:rw,shared"

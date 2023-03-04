@@ -1,0 +1,92 @@
+-
+    name: "Create system group"
+    group:
+        name: "{{ app_system_user }}"
+        gid: "{{ app_system_user_gid }}"
+        system: true
+
+-
+    name: "Create system user"
+    user:
+        create_home: false
+        group: "{{ app_system_user_gid }}"
+        home: "/"
+        name: "{{ app_system_user }}"
+        password: "!"
+        shell: "/sbin/nologin"
+        state: "present"
+        system: true
+        uid: "{{ app_system_user_uid }}"
+    register: "app_user"
+
+-
+    name: "Create app directory"
+    file:
+        path: "{{ app_root_dir }}/{{ directory.path|default(directory) }}"
+        state: "directory"
+        owner: "{{ directory.owner|default(app_user.uid) }}"
+        group: "{{ directory.group|default(app_user.group) }}"
+        mode: "{{ directory.mode|default('0755') }}"
+    loop_control:
+        loop_var: "directory"
+    with_items:
+        -
+            path: ""
+            owner: root
+            group: root
+        -
+            path: "data"
+            owner: root
+            group: root
+        - "data/configs"
+        - "data/logs"
+        - "data/juicefs"
+        - "data/juicefs-cache"
+        -
+            path: "juicefs"
+            owner: "root"
+            group: "root"
+        -
+            path: "secrets"
+            owner: "root"
+            mode: "0750"
+        -
+            path: "secrets/juicefs"
+            owner: "root"
+            mode: "0750"
+    register: "app_dirs_modified"
+
+-
+    name: "Copy config"
+    template:
+        src: "{{ file.path|default(file) }}"
+        dest: "{{ app_root_dir }}/{{ file.path|default(file) }}"
+        owner: "{{ file.owner|default('root') }}"
+        group: "{{ file.group|default('root') }}"
+        mode: "{{ file.mode|default('0644') }}"
+    loop_control:
+        loop_var: "file"
+    with_items:
+        - "docker-compose.yml"
+        -
+            path: "juicefs/entrypoint.sh"
+            mode: "0755"
+        -
+            path: "juicefs/healthcheck.sh"
+            mode: "0755"
+        -
+            path: "secrets/juicefs/env"
+            group: "{{ app_user.group }}"
+            mode: "0640"
+    register: "app_files_modified"
+
+-
+    name: "Update application"
+    docker_compose:
+        project_name: "{{ app_compose_project_name }}"
+        project_src: "{{ app_root_dir }}"
+        pull: true
+        remove_orphans: true
+        restarted: true
+        state: "present"
+    when: "not app_skip_start and (app_dirs_modified.changed or app_files_modified.changed)"
