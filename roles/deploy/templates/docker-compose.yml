@@ -30,6 +30,8 @@ services:
         depends_on:
             juicefs:
                 condition: "service_healthy"
+        devices:
+            - "/dev/dri"
         environment:
             TZ: "America/Indiana/Indianapolis"
             PUID: "{{ app_user.uid }}"
