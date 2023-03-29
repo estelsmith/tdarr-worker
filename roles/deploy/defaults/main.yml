@@ -9,5 +9,3 @@ app_compose_image: "ghcr.io/haveagitgat/tdarr_node:2.00.19.1"
 
 app_tdarr_server_ip: "{{ undef('You must provide a Tdarr server IP') }}"
 app_tdarr_node_name: "tdarr-worker"
-
-juicefs_redis_url: "{{ undef('You must provide a JuiceFS Redis URL') }}"

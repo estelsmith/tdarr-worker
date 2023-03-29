@@ -7,8 +7,6 @@ pipeline:
             - "ansible_host"
             - "ansible_remote_user"
             - "deploy_key"
-            - "juicefs_redis_url"
-            - "app_tdarr_server_ip"
             - "ansible_extra_vars"
         commands:
             - echo -n "$${ANSIBLE_BECOME_PASSWORD}" > .ansible_password
@@ -19,7 +17,5 @@ pipeline:
                 --private-key deploy_key
                 --user "$${ANSIBLE_REMOTE_USER}"
                 -i "$${ANSIBLE_HOST},"
-                -e "juicefs_redis_url=$${JUICEFS_REDIS_URL}"
-                -e "app_tdarr_server_ip=$${APP_TDARR_SERVER_IP}"
                 -e @extra_vars
                 playbooks/deploy.yml

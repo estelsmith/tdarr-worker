@@ -40,20 +40,7 @@
             group: root
         - "data/configs"
         - "data/logs"
-        - "data/juicefs"
-        - "data/juicefs-cache"
-        -
-            path: "juicefs"
-            owner: "root"
-            group: "root"
-        -
-            path: "secrets"
-            owner: "root"
-            mode: "0750"
-        -
-            path: "secrets/juicefs"
-            owner: "root"
-            mode: "0750"
+        - "data/library"
     register: "app_dirs_modified"
 
 -
@@ -68,16 +55,6 @@
         loop_var: "file"
     with_items:
         - "docker-compose.yml"
-        -
-            path: "juicefs/entrypoint.sh"
-            mode: "0755"
-        -
-            path: "juicefs/healthcheck.sh"
-            mode: "0755"
-        -
-            path: "secrets/juicefs/env"
-            group: "{{ app_user.group }}"
-            mode: "0640"
     register: "app_files_modified"
 
 -
